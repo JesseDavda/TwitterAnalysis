@@ -23,7 +23,7 @@ console.log(total_tweets);
 
 io.on('connection', (socket) => {
     console.log("A user connected");
-    
+
     var tweetObj = {
             total_tweets: total_tweets,
             location: 0,
@@ -54,6 +54,22 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
         average_favorites = Math.ceil(total_favorites / total_tweets);
         average_retweets = Math.ceil(total_retweets / total_tweets);
 
+        if(total_tweets % 50 == 0) {
+            var data = {
+                "total_tweets": total_tweets,
+                "average_followers": average_followers,
+                "total_followers": total_followers,
+                "average_favorites": average_favorites,
+                "total_favorites": total_favorites,
+                "average_retweets": average_retweets,
+                "total_retweets": total_retweets
+            }
+
+            fs.writeFile("./database.json", data, (err, data) => {
+                if(err) console.log(err);
+                console.log('File Saved');
+            });
+        }
 
         var tweetObj = {
             total_tweets: total_tweets,
