@@ -65,7 +65,9 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
                 "total_retweets": total_retweets
             }
 
-            fs.writeFile("./database.json", data, (err, data) => {
+	    var writeData = JSON.stringify(data);
+
+            fs.writeFile("./database.json", writeData, (err, data) => {
                 if(err) console.log(err);
                 console.log('File Saved');
             });
