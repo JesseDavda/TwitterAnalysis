@@ -7,8 +7,8 @@ const Twitter = require('twitter');
 const fs = require('fs');
 
 const app = express();
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const server = app.listen(8082);
+const io = require('socket.io').listen(server);
 
 var dataObj = JSON.parse(fs.readFileSync('./database.json', 'utf8')),
     total_tweets = dataObj.total_tweets,
@@ -23,6 +23,16 @@ console.log(total_tweets);
 
 io.on('connection', (socket) => {
     console.log("A user connected");
+    
+    var tweetObj = {
+            total_tweets: total_tweets,
+            location: 0,
+            average_retweets: average_retweets,
+            average_favorites: average_favorites,
+            average_followers: average_followers
+    };
+
+    socket.emit("tweet",tweetObj);
 });
 
 var client = new Twitter({
@@ -53,7 +63,7 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
             average_followers: average_followers
         };
 
-        io.emit('another retweet', tweetObj);
+       io.sockets.emit('tweet', tweetObj);
     });
 
     stream.on('error', error => {
