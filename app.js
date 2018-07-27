@@ -1,5 +1,6 @@
 "use strict";
 
+//importing various libraries
 const express = require('express');
 const axios = require('axios');
 const request = require('request');
@@ -8,9 +9,11 @@ const moment = require('moment');
 const fs = require('fs');
 
 const app = express();
+//setting up the websocket
 const server = app.listen(8082);
 const io = require('socket.io').listen(server);
 
+//Reading the JSON object saved to the file and assiging variables
 var dataObj = JSON.parse(fs.readFileSync('./data.json', 'utf8')),
     total_tweets = dataObj.total_tweets,
     average_followers = dataObj.average_followers,
@@ -26,6 +29,7 @@ io.on('connection', (socket) => {
     console.log("A user connected!");
 });
 
+//credentials for the twitter API
 var client = new Twitter({
     consumer_key: 'SKRkMxR59nLZQAL84yKt977ue',
     consumer_secret: 'SVX0NDvQaGBbTWR3vM8jfXBSjc5axwfUpE1eQAhUNeIyWiXhOe',
@@ -39,6 +43,7 @@ var found, day_tweets, index;
 client.stream('statuses/filter', {track: 'football'}, stream => {
 
     stream.on('data', async (tweet) => {
+        //incrementing the variables and recalculating the averages per tweet
         total_tweets++;
         total_followers += tweet.user.followers_count;
         total_favorites += tweet.user.faviroute_count;
@@ -47,16 +52,20 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
         average_favorites = Math.ceil(total_favorites / total_tweets);
         average_retweets = Math.ceil(total_retweets / total_tweets);
 
+        //Change the format of the date from the format that is given in the twitter API to DD/MM/YY
         var date = moment(tweet.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
 
+        //Checking if the current date is already part of the array
         found = await dataObj.day_data.some(data => {
             return data.date == date;
         });
 
+        //if it is then we just increment the number of tweets for that date object
         if(found) {
-            index = dataObj.day_data.findIndex(i => i.date == date);
+            index = await dataObj.day_data.findIndex(i => i.date == date);
             dataObj.day_data[index].day_tweets++;
         } else {
+        //Otherwise we create a new object and push it to the array of date objects
             var newDay = {
                 "date": date,
                 "day_tweets": 1
@@ -64,6 +73,7 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
             dataObj.day_data.push(newDay);
         }
 
+        //Every 50 tweet objects that are recieved from the API we save the data to the JSON file
         if(total_tweets % 50 == 0) {
             var data = {
                 "total_tweets": total_tweets,
@@ -85,6 +95,7 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
         }
         console.log("days ----------- ", dataObj.day_data);
 
+        //This is the JSON object created that will be emitted across the socket in real time to the client
         var tweetObj = {
             total_tweets: total_tweets,
             location: tweet.user.location,
