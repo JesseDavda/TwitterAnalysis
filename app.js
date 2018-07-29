@@ -22,10 +22,9 @@ var dataObj = JSON.parse(fs.readFileSync('./data.json', 'utf8')),
     total_favorites = dataObj.total_favorites,
     average_retweets = dataObj.average_retweets,
     total_retweets = dataObj.total_retweets,
-    day_data = dataObj
+    day_data = dataObj;
 
-console.log(total_tweets);
-
+//The event-handler for when a user connects and an object with all the previous data is emitted
 io.on('connection', (socket) => {
     var starterObj = {
         total_tweets: total_tweets,
@@ -109,7 +108,6 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
                 console.log('File Saved');
             });
         }
-        //console.log("days ----------- ", dataObj.day_data);
 
         //This is the JSON object created that will be emitted across the socket in real time to the client
         var tweetObj = {
@@ -123,24 +121,27 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
 
         console.log("=======================");
         console.log(tweetObj);
-
+        //Emit the data from the tweet accross the websocket
         io.sockets.emit('New Tweet', tweetObj);
     });
 
+    //Catch any errors associated with a new tweet coming in
     stream.on('error', error => {
         console.log(error);
     });
 });
 
+// //This is the search options object, it contains the parameters for the twitter database search
 // var searchObj = {
-//     q: "Rocky Horror Show",
-//     lang: "en"
+//      q: "Rocky Horror Show, Richard O'Brien, Rocky Horror Picture Show, Rocky Horror Show, frankenfurter, frank-en-furter, sweet transvestite",
+//      lang: "en"
 // }
-//
+// //This is where the actual tweets search takes place
 // client.get('search/tweets', searchObj, function(error, tweets, response) {
-//      //
+//      console.log(tweets);
 // });
 
+//Telling the server what port to listen on for incoming connections
 var port = process.env.PORT || 8081;
 app.listen(port, () => {
     console.log("Server is running on port " + port);
