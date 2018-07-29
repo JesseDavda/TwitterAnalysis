@@ -13,8 +13,8 @@ const app = express();
 const server = app.listen(8082);
 const io = require('socket.io').listen(server);
 
-var found, day_tweets, index, past_data, p_avgRetweets, p_ttlRetweets, p_avgFavorites, p_ttlFavorites,
-    p_avgFollowers, p_ttlFollowers, p_ttlTweets;
+var found, day_tweets, index, past_data, p_avgRetweets = 0, p_ttlRetweets = 0, p_avgFavorites = 0, p_ttlFavorites = 0,
+    p_avgFollowers = 0, p_ttlFollowers = 0, p_ttlTweets = 0;
 
 //Reading the JSON object saved to the file and assiging variables
 var dataObj = JSON.parse(fs.readFileSync('./data.json', 'utf8')),
@@ -106,8 +106,8 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
             day_data: dataObj.day_data[index]
         };
 
-        console.log("=======================");
-        console.log(tweetObj);
+        //console.log("=======================");
+        //console.log(tweetObj);
         //Emit the data from the tweet accross the websocket
         io.sockets.emit('New Tweet', tweetObj);
     });
@@ -126,10 +126,9 @@ var searchObj = {
 
 //This is where the actual tweets search takes place
 client.get('search/tweets', searchObj, function(error, tweets, response) {
-     console.log(tweets);
+     p_ttlTweets = tweets.search_metadata.count;
      tweets.statuses.forEach(i => {
          if(i.retweeted_status != undefined) {
-             p_ttlTweets++;
              p_ttlRetweets += i.retweeted_status.retweet_count;
              p_ttlFavorites += i.retweeted_status.favorite_count;
              p_ttlFollowers += i.retweeted_status.user.followers_count;
