@@ -46,14 +46,20 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
         //incrementing the variables and recalculating the averages per tweet
         total_tweets++;
         total_followers += tweet.user.followers_count;
-        total_favorites += tweet.user.faviroute_count;
-        total_retweets += tweet.user.retweet_count;
         average_followers = Math.ceil(total_followers / total_tweets);
         average_favorites = Math.ceil(total_favorites / total_tweets);
         average_retweets = Math.ceil(total_retweets / total_tweets);
 
+        //All tweets are new so if they are retweets we use the original tweets favorite and retweet data
+        if(tweet.retweeted_status != undefined) {
+            total_retweets += tweet.retweeted_status.retweet_count;
+            total_favorites += tweet.retweeted_status.favorite_count;
+        }
+
+        //console.log(tweet);
+
         //Change the format of the date from the format that is given in the twitter API to DD/MM/YY
-        var date = moment(tweet.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
+        var date = await moment(tweet.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
 
         //Checking if the current date is already part of the array
         found = await dataObj.day_data.some(data => {
@@ -93,7 +99,7 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
                 console.log('File Saved');
             });
         }
-        console.log("days ----------- ", dataObj.day_data);
+        //console.log("days ----------- ", dataObj.day_data);
 
         //This is the JSON object created that will be emitted across the socket in real time to the client
         var tweetObj = {
@@ -106,9 +112,9 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
         };
 
         console.log("=======================");
-        //console.log(tweet.text);
+        console.log(tweetObj);
 
-       io.sockets.emit('tweet', tweetObj);
+        io.sockets.emit('tweet', tweetObj);
     });
 
     stream.on('error', error => {
