@@ -13,8 +13,19 @@ const app = express();
 const server = app.listen(8082);
 const io = require('socket.io').listen(server);
 
-var found, day_tweets, index, past_data, p_avgRetweets = 0, p_ttlRetweets = 0, p_avgFavorites = 0, p_ttlFavorites = 0,
+var found, day_tweets, index, p_avgRetweets = 0, p_ttlRetweets = 0, p_avgFavorites = 0, p_ttlFavorites = 0,
     p_avgFollowers = 0, p_ttlFollowers = 0, p_ttlTweets = 0;
+
+var past_data = {
+    total_tweets: 0,
+    average_followers: 0,
+    average_favorites: 0,
+    average_retweets: 0,
+    pastDay_data: [{
+        date:"29/07/18",
+        day_tweets: 0
+    }]
+};
 
 //Reading the JSON object saved to the file and assiging variables
 var dataObj = JSON.parse(fs.readFileSync('./data.json', 'utf8')),
@@ -124,28 +135,48 @@ var searchObj = {
      lang: "en"
 }
 
+var p_date, p_found, p_index;
+
 //This is where the actual tweets search takes place
-client.get('search/tweets', searchObj, function(error, tweets, response) {
+client.get('search/tweets', searchObj, async (tweets, e) => {
      p_ttlTweets = tweets.search_metadata.count;
+     //Looping through all of the recieved tweets and totalling their follower, retweets and favorite counts
      tweets.statuses.forEach(i => {
          if(i.retweeted_status != undefined) {
-             console.log("=====", i.retweeted_status.user.followers_count);
              p_ttlRetweets += i.retweeted_status.retweet_count;
              p_ttlFavorites += i.retweeted_status.favorite_count;
              p_ttlFollowers += i.retweeted_status.user.followers_count;
          }
+
+         p_date = moment(i.retweeted_status.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
+
+         p_found = await past_data.pastDay_data.some(data => {
+             return data.date == date;
+         });
+
+         if(p_found) {
+             p_index = await past_data.pastDay_data.findIndex(i => i.date == date);
+             past_data.pastDay_data[p_index].day_tweets++;
+         } else {
+             var newDay = {
+                 date: p_date,
+                 day_tweets: 1
+             }
+
+             past_data.pastDay_data.push(newDay);
+         }
      });
 
+     //calculating the averages for all the tweet data that is recieved from the search endpoint
      p_avgRetweets = Math.ceil(p_ttlFollowers / p_ttlTweets);
      p_avgFavorites = Math.ceil(p_ttlFavorites / p_ttlTweets);
      p_avgFollowers = Math.ceil(p_ttlFollowers / p_ttlTweets);
 
-     past_data = {
-         total_tweets: p_ttlTweets,
-         average_followers: p_avgFollowers,
-         average_favorites: p_avgFavorites,
-         average_retweets: p_avgRetweets
-     };
+     //Creating the JSON object that will be emitted accross the web socket to the client
+     past_data.total_tweets = p_ttlTweets;
+     past_data.average_retweets = p_avgRetweets;
+     past_data.average_followers = p_avgFollowers;
+     past_data.average_favorites = p_avgFavorites;
 });
 
 //The event-handler for when a user connects and an object with all the previous data is emitted
