@@ -35,7 +35,7 @@ io.on('connection', (socket) => {
         day_data: dataObj.day_data,
     }
 
-    socket.emit("Starting Values", starte0bj);
+    socket.emit("Starting Values", starter0bj);
 
 });
 
@@ -118,13 +118,13 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
             average_retweets: average_retweets,
             average_favorites: average_favorites,
             average_followers: average_followers,
-            day_data: dataObj.day_data
+            day_data: dataObj.day_data[index]
         };
 
         console.log("=======================");
         console.log(tweetObj);
 
-        io.sockets.emit('tweet', tweetObj);
+        io.sockets.emit('New Tweet', tweetObj);
     });
 
     stream.on('error', error => {
