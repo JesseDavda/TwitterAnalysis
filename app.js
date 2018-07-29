@@ -35,7 +35,7 @@ io.on('connection', (socket) => {
         day_data: dataObj.day_data,
     }
 
-    socket.emit("Starting Values", starter0bj);
+    socket.emit("Starting Values", starterObj);
 
 });
 
