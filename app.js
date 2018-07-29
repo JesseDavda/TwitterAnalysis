@@ -141,7 +141,7 @@ var p_date, p_found, p_index;
 client.get('search/tweets', searchObj, function(error, tweets, response) {
      p_ttlTweets = tweets.search_metadata.count;
      //Looping through all of the recieved tweets and totalling their follower, retweets and favorite counts
-     tweets.statuses.forEach(async (i) => {
+     tweets.statuses.forEach((i) => {
          if(i.retweeted_status != undefined) {
              p_ttlRetweets += i.retweeted_status.retweet_count;
              p_ttlFavorites += i.retweeted_status.favorite_count;
@@ -150,12 +150,12 @@ client.get('search/tweets', searchObj, function(error, tweets, response) {
 
          p_date = moment(i.retweeted_status.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
 
-         p_found = await past_data.pastDay_data.some(data => {
+         p_found = past_data.pastDay_data.some(data => {
              return data.date == date;
          });
 
          if(p_found) {
-             p_index = await past_data.pastDay_data.findIndex(i => i.date == date);
+             p_index = past_data.pastDay_data.findIndex(i => i.date == date);
              past_data.pastDay_data[p_index].day_tweets++;
          } else {
              var newDay = {
