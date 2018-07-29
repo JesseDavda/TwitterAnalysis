@@ -47,7 +47,7 @@ var client = new Twitter({
 });
 
 //{track: "Rocky Horror Show, Richard O'Brien, Rocky Horror Picture Show, Rocky Horror Show, frankenfurter, frank-en-furter, sweet transvestite", language: 'en'}
-client.stream('statuses/filter', {track: 'football'}, stream => {
+client.stream('statuses/filter', {track: "Rocky Horror Show, Richard O'Brien, Rocky Horror Picture Show, Rocky Horror Show, frankenfurter, frank-en-furter, sweet transvestite"}, stream => {
 
     stream.on('data', async (tweet) => {
         //incrementing the variables and recalculating the averages per tweet
@@ -117,8 +117,8 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
             day_data: dataObj.day_data[index]
         };
 
-        //console.log("=======================");
-        //console.log(tweetObj);
+        console.log("=======================");
+        console.log(tweetObj);
         //Emit the data from the tweet accross the websocket
         io.sockets.emit('New Tweet', tweetObj);
     });
@@ -131,7 +131,7 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
 
 //This is the search options object, it contains the parameters for the twitter database search
 var searchObj = {
-     q: "football",
+     q: "Rocky Horror Show, Richard O'Brien, Rocky Horror Picture Show, Rocky Horror Show, frankenfurter, frank-en-furter, sweet transvestite, @",
      lang: "en"
 }
 
@@ -147,15 +147,18 @@ client.get('search/tweets', searchObj, function(error, tweets, response) {
              p_ttlFavorites += i.retweeted_status.favorite_count;
              p_ttlFollowers += i.retweeted_status.user.followers_count;
 
+             //extracting the dat from the returned object it is in different places depending on whether or not the tweet is a retweet or not
              p_date = moment(i.retweeted_status.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
          } else {
              p_date = moment(i.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
          }
 
+         //finding out if todays date is already an object or not
          p_found = past_data.pastDay_data.some(data => {
              return data.date == p_date;
          });
 
+         //if it is not found create a new day for it otherwise just increment the variable in that day
          if(p_found) {
              p_index = past_data.pastDay_data.findIndex(i => i.date == p_date);
              past_data.pastDay_data[p_index].day_tweets++;
