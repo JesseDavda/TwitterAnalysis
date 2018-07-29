@@ -151,11 +151,11 @@ client.get('search/tweets', searchObj, function(error, tweets, response) {
          p_date = moment(i.retweeted_status.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
 
          p_found = past_data.pastDay_data.some(data => {
-             return data.date == date;
+             return data.date == p_date;
          });
 
          if(p_found) {
-             p_index = past_data.pastDay_data.findIndex(i => i.date == date);
+             p_index = past_data.pastDay_data.findIndex(i => i.date == p_date);
              past_data.pastDay_data[p_index].day_tweets++;
          } else {
              var newDay = {
