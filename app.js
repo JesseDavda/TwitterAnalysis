@@ -138,10 +138,10 @@ var searchObj = {
 var p_date, p_found, p_index;
 
 //This is where the actual tweets search takes place
-client.get('search/tweets', searchObj, async (tweets, e) => {
+client.get('search/tweets', searchObj, (tweets, e) => {
      p_ttlTweets = tweets.search_metadata.count;
      //Looping through all of the recieved tweets and totalling their follower, retweets and favorite counts
-     tweets.statuses.forEach(i => {
+     tweets.statuses.forEach(async (i) => {
          if(i.retweeted_status != undefined) {
              p_ttlRetweets += i.retweeted_status.retweet_count;
              p_ttlFavorites += i.retweeted_status.favorite_count;
