@@ -13,6 +13,9 @@ const app = express();
 const server = app.listen(8082);
 const io = require('socket.io').listen(server);
 
+var found, day_tweets, index, past_data, p_avgRetweets, p_ttlRetweets, p_avgFavorites, p_ttlFavorites,
+    p_avgFollowers, p_ttlFollowers, p_ttlTweets;
+
 //Reading the JSON object saved to the file and assiging variables
 var dataObj = JSON.parse(fs.readFileSync('./data.json', 'utf8')),
     total_tweets = dataObj.total_tweets,
@@ -32,9 +35,11 @@ io.on('connection', (socket) => {
         average_favorites: average_favorites,
         average_followers: average_followers,
         day_data: dataObj.day_data,
+        past_data: past_data
     }
 
     socket.emit("Starting Values", starterObj);
+    socket.emit("Past Data", past_data);
 
 });
 
@@ -45,8 +50,6 @@ var client = new Twitter({
     access_token_key: '1021330277631655936-TxcGnnEls7zEwRGolARSzogVP4AHq1',
     access_token_secret: 'PC9LkNV2GcadYz58i9GJyfqHsm6r4nU8AjOc3Zd682Em2'
 });
-
-var found, day_tweets, index;
 
 //{track: "Rocky Horror Show, Richard O'Brien, Rocky Horror Picture Show, Rocky Horror Show, frankenfurter, frank-en-furter, sweet transvestite", language: 'en'}
 client.stream('statuses/filter', {track: 'football'}, stream => {
@@ -131,15 +134,37 @@ client.stream('statuses/filter', {track: 'football'}, stream => {
     });
 });
 
-// //This is the search options object, it contains the parameters for the twitter database search
-// var searchObj = {
-//      q: "Rocky Horror Show, Richard O'Brien, Rocky Horror Picture Show, Rocky Horror Show, frankenfurter, frank-en-furter, sweet transvestite",
-//      lang: "en"
-// }
-// //This is where the actual tweets search takes place
-// client.get('search/tweets', searchObj, function(error, tweets, response) {
-//      console.log(tweets);
-// });
+//This is the search options object, it contains the parameters for the twitter database search
+var searchObj = {
+     q: "football",
+     lang: "en"
+}
+
+//This is where the actual tweets search takes place
+client.get('search/tweets', searchObj, function(error, tweets, response) {
+     console.log(tweets);
+     tweets.statuses.forEach(i => {
+         if(i.retweeted_status != undefined) {
+             p_ttlTweets++;
+             p_ttlRetweets += i.retweeted_status.retweet_count;
+             p_ttlFavorites += i.retweeted_status.favorite_count;
+             p_ttlFollowers += i.retweeted_status.user.followers_count;
+         } else {
+             p_ttlTweets++;
+         }
+     });
+
+     p_avgRetweets = Math.ceil(p_ttlFollowers / p_ttlTweets);
+     p_avgFavorites = Math.ceil(p_ttlFavorites / p_ttlTweets);
+     p_avgFollowers = Math.ceil(p_ttlFollowers / p_ttlTweets);
+
+     past_data = {
+         total_tweets: p_ttlTweets,
+         average_followers: p_avgFollowers,
+         average_favorites: p_avgFavorites,
+         average_retweets: p_avgRetweets
+     };
+});
 
 //Telling the server what port to listen on for incoming connections
 var port = process.env.PORT || 8081;
