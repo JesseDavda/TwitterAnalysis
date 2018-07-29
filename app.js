@@ -129,11 +129,10 @@ client.get('search/tweets', searchObj, function(error, tweets, response) {
      p_ttlTweets = tweets.search_metadata.count;
      tweets.statuses.forEach(i => {
          if(i.retweeted_status != undefined) {
+             console.log("=====", i.retweeted_status.user.followers_count);
              p_ttlRetweets += i.retweeted_status.retweet_count;
              p_ttlFavorites += i.retweeted_status.favorite_count;
              p_ttlFollowers += i.retweeted_status.user.followers_count;
-         } else {
-             p_ttlTweets++;
          }
      });
 
