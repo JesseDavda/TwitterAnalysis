@@ -21,12 +21,22 @@ var dataObj = JSON.parse(fs.readFileSync('./data.json', 'utf8')),
     average_favorites = dataObj.average_followers,
     total_favorites = dataObj.total_favorites,
     average_retweets = dataObj.average_retweets,
-    total_retweets = dataObj.total_retweets;
+    total_retweets = dataObj.total_retweets,
+    day_data = dataObj
 
 console.log(total_tweets);
 
 io.on('connection', (socket) => {
-    console.log("A user connected!");
+    var starterObj = {
+        total_tweets: total_tweets,
+        average_retweets: average_retweets,
+        average_favorites: average_favorites,
+        average_followers: average_followers,
+        day_data: dataObj.day_data,
+    }
+
+    socket.emit("Starting Values", starte0bj);
+
 });
 
 //credentials for the twitter API
