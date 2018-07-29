@@ -146,9 +146,11 @@ client.get('search/tweets', searchObj, function(error, tweets, response) {
              p_ttlRetweets += i.retweeted_status.retweet_count;
              p_ttlFavorites += i.retweeted_status.favorite_count;
              p_ttlFollowers += i.retweeted_status.user.followers_count;
-         }
 
-         p_date = moment(i.retweeted_status.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
+             p_date = moment(i.retweeted_status.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
+         } else {
+             p_date = moment(i.created_at, "ddd MMM DD HH:mm:ss Z YYYY").format("DD/MM/YY");
+         }
 
          p_found = past_data.pastDay_data.some(data => {
              return data.date == p_date;
@@ -177,6 +179,8 @@ client.get('search/tweets', searchObj, function(error, tweets, response) {
      past_data.average_retweets = p_avgRetweets;
      past_data.average_followers = p_avgFollowers;
      past_data.average_favorites = p_avgFavorites;
+
+     console.log(past_data);
 });
 
 //The event-handler for when a user connects and an object with all the previous data is emitted
