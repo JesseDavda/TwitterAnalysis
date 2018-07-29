@@ -27,22 +27,6 @@ var dataObj = JSON.parse(fs.readFileSync('./data.json', 'utf8')),
     total_retweets = dataObj.total_retweets,
     day_data = dataObj;
 
-//The event-handler for when a user connects and an object with all the previous data is emitted
-io.on('connection', (socket) => {
-    var starterObj = {
-        total_tweets: total_tweets,
-        average_retweets: average_retweets,
-        average_favorites: average_favorites,
-        average_followers: average_followers,
-        day_data: dataObj.day_data,
-        past_data: past_data
-    }
-
-    socket.emit("Starting Values", starterObj);
-    socket.emit("Past Data", past_data);
-
-});
-
 //credentials for the twitter API
 var client = new Twitter({
     consumer_key: 'SKRkMxR59nLZQAL84yKt977ue',
@@ -164,6 +148,20 @@ client.get('search/tweets', searchObj, function(error, tweets, response) {
          average_favorites: p_avgFavorites,
          average_retweets: p_avgRetweets
      };
+});
+
+//The event-handler for when a user connects and an object with all the previous data is emitted
+io.on('connection', (socket) => {
+    var starterObj = {
+        total_tweets: total_tweets,
+        average_retweets: average_retweets,
+        average_favorites: average_favorites,
+        average_followers: average_followers,
+        day_data: dataObj.day_data,
+        past_data: past_data
+    }
+
+    socket.emit("Starting Values", starterObj);
 });
 
 //Telling the server what port to listen on for incoming connections
