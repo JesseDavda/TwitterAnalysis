@@ -50,7 +50,7 @@ var client = new Twitter({
 var found, day_tweets, index;
 
 //{track: "Rocky Horror Show, Richard O'Brien, Rocky Horror Picture Show, Rocky Horror Show, frankenfurter, frank-en-furter, sweet transvestite", language: 'en'}
-client.stream('statuses/filter', {track: 'the'}, stream => {
+client.stream('statuses/filter', {track: 'football'}, stream => {
 
     stream.on('data', async (tweet) => {
         //incrementing the variables and recalculating the averages per tweet
