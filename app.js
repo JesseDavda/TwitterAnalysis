@@ -175,7 +175,7 @@ client.get('search/tweets', searchObj, function(error, tweets, response) {
      //calculating the averages for all the tweet data that is recieved from the search endpoint
      p_avgRetweets = Math.ceil(p_ttlFollowers / p_ttlTweets);
      p_avgFavorites = Math.ceil(p_ttlFavorites / p_ttlTweets);
-     p_avgFollowers = Math.ceil(p_ttlFollowers / p_ttlTweets);
+     p_avgFollowers = Math.ceil(p_ttlFollowers / p_ttlTweets);  
 
      //Creating the JSON object that will be emitted accross the web socket to the client
      past_data.total_tweets = p_ttlTweets;
